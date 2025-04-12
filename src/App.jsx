@@ -14,7 +14,6 @@ import PassengersBoard from './pages/PassengersBoard';
 import FlightsInTheAir from './pages/FlightsInTheAir';
 import FlightsOnTheGround from './pages/FlightsOnTheGround';
 import PassengersDisembark from './pages/PassengersDisembark';
-import TestPage from './pages/TestPage';
 import AssignPilot from './pages/AssignPilot';
 import RecycleCrew from './pages/RecycleCrew2';
 import RetireFlight from './pages/RetireFlight2';
@@ -45,7 +44,6 @@ function App() {
           {/* 主页 */}
           <Route path="/" element={<MainPage />} />
           <Route path="/dashboard" element={<MainPage />} />
-          <Route path="/test" element={<TestPage />} />
           
           {/* 已创建的组件 */}
           <Route path="/add-airplane" element={<AddAirplane />} />

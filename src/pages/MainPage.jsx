@@ -355,18 +355,6 @@ const MainPage = () => {
                 <p className="text-gray-500 text-sm">Trigger a simulation cycle in the system</p>
               </div>
             </Link>
-            
-            <Link to="/test" className="bg-white p-6 rounded-md shadow-sm flex items-start hover:shadow-md transition-shadow">
-              <div className="bg-gray-100 p-3 rounded-md mr-4">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 16.1711C7.8501 15.5662 7 14.3785 7 13C7 10.7909 8.79086 9 11 9H13C15.2091 9 17 10.7909 17 13C17 14.3785 16.1499 15.5662 15 16.1711M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold mb-1">Test Page</h2>
-                <p className="text-gray-500 text-sm">Test page</p>
-              </div>
-            </Link>
           </div>
         </div>
       </div>
