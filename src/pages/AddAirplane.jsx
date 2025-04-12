@@ -14,6 +14,7 @@ export default function AddAirplane() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [apiResponse, setApiResponse] = useState(null);
 
   useEffect(() => {
     // Set the document title
@@ -23,6 +24,7 @@ export default function AddAirplane() {
   const handleAddAirplane = async () => {
     setMessage('');
     setError('');
+    setApiResponse(null);
     setLoading(true);
 
     if (!airlineID || !tailNum || !planeType) {
@@ -32,28 +34,47 @@ export default function AddAirplane() {
     }
 
     try {
-      // 使用从constant.js导入的API_BASE_URL
+      // 构建请求数据
+      const requestData = {
+        airlineID: airlineID,
+        tail_num: tailNum,
+        seat_capacity: parseInt(seatCapacity) || 0,
+        speed: parseInt(speed) || 0,
+        locationID: locationID || null,
+        plane_type: planeType,
+        maintenanced: maintenanced, // 注意这里使用布尔值
+        model: model || null,
+        neo: neo, // 注意这里使用布尔值
+      };
+
+      console.log('Sending request to:', `${API_BASE_URL}/procedures/add_airplane`);
+      console.log('Request data:', requestData);
+
       const response = await fetch(`${API_BASE_URL}/procedures/add_airplane`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // 添加CORS相关头部
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({
-          airlineID: airlineID,
-          tail_num: tailNum,
-          seat_capacity: parseInt(seatCapacity) || 0,
-          speed: parseInt(speed) || 0,
-          locationID: locationID || null,
-          plane_type: planeType,
-          maintenanced: maintenanced,
-          model: model || null,
-          neo: neo,
-        }),
+        body: JSON.stringify(requestData),
       });
 
+      // 保存完整响应以便调试
+      const responseData = await response.text();
+      console.log('Raw response:', responseData);
+      
+      let parsedData;
+      try {
+        parsedData = JSON.parse(responseData);
+      } catch (e) {
+        parsedData = { message: responseData };
+      }
+      
+      setApiResponse(parsedData);
+
       if (response.ok) {
-        const data = await response.json();
-        setMessage(data.message || 'Airplane added successfully!');
+        setMessage(parsedData.message || 'Airplane added successfully!');
         // Reset form after successful submission
         setAirlineID('');
         setTailNum('');
@@ -65,12 +86,11 @@ export default function AddAirplane() {
         setModel('');
         setNeo(false);
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to add airplane.');
+        setError(parsedData.error || `Failed to add airplane. Status: ${response.status}`);
       }
     } catch (err) {
       console.error('Error adding airplane:', err);
-      setError('An unexpected error occurred. Please check if the API server is running.');
+      setError(`An unexpected error occurred: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -116,6 +136,15 @@ export default function AddAirplane() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
               {error}
+            </div>
+          )}
+
+          {apiResponse && (
+            <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded mb-6 text-sm">
+              <details>
+                <summary className="cursor-pointer font-medium">API Response (Debug)</summary>
+                <pre className="mt-2 overflow-auto">{JSON.stringify(apiResponse, null, 2)}</pre>
+              </details>
             </div>
           )}
 
