@@ -1,4 +1,4 @@
 // API相关配置
-export const API_BASE_URL = "https://061e-128-61-160-185.ngrok-free.app/api";
+export const API_BASE_URL = "/api";
 
-// 当ngrok URL变化时，只需要更新这一处 
+// 使用相对路径，由Vite代理处理CORS问题 
