@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PageTemplate from '../components/PageTemplate';
 import { API_BASE_URL } from '../constant';
 
 export default function AddAirplane() {
@@ -8,272 +9,161 @@ export default function AddAirplane() {
   const [speed, setSpeed] = useState('');
   const [locationID, setLocationID] = useState('');
   const [planeType, setPlaneType] = useState('');
-  const [maintenanced, setMaintenanced] = useState(false);
+  const [maintenanced, setMaintenanced] = useState('null');
   const [model, setModel] = useState('');
-  const [neo, setNeo] = useState(false);
+  const [neo, setNeo] = useState('null');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [apiResponse, setApiResponse] = useState(null);
 
   useEffect(() => {
-    // Set the document title
-    document.title = 'Add Airplane | Airline Management System';
+    document.title = 'Add Airplane';
   }, []);
 
-  const handleAddAirplane = async () => {
-    setMessage('');
-    setError('');
-    setApiResponse(null);
-    setLoading(true);
+  // helper to convert "true" | "false" | "null" ➜ boolean | null
+  const parseBoolOrNull = (v) => (v === 'true' ? true : v === 'false' ? false : null);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!airlineID || !tailNum || !planeType) {
-      setError('Airline ID, Tail Number, and Plane Type are required.');
-      setLoading(false);
+      alert('Airline ID, Tail Number, and Plane Type are required.');
       return;
     }
-
+    setLoading(true);
     try {
-      // 构建请求数据
-      const requestData = {
-        airlineID: airlineID,
+      const body = {
+        airlineID,
         tail_num: tailNum,
-        seat_capacity: parseInt(seatCapacity) || 0,
-        speed: parseInt(speed) || 0,
+        seat_capacity: parseInt(seatCapacity, 10) || 0,
+        speed: parseInt(speed, 10) || 0,
         locationID: locationID || null,
         plane_type: planeType,
-        maintenanced: maintenanced, // 注意这里使用布尔值
-        model: model || null,
-        neo: neo, // 注意这里使用布尔值
+        maintenanced: parseBoolOrNull(maintenanced),
+        model: model.trim() === '' || model === 'null' ? null : model,
+        neo: parseBoolOrNull(neo),
       };
-
-      console.log('Sending request to:', `${API_BASE_URL}/procedures/add_airplane`);
-      console.log('Request data:', requestData);
-
-      const response = await fetch(`${API_BASE_URL}/procedures/add_airplane`, {
+      const res = await fetch(`${API_BASE_URL}/procedures/add_airplane`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // 添加CORS相关头部
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(requestData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
-
-      // 保存完整响应以便调试
-      const responseData = await response.text();
-      console.log('Raw response:', responseData);
-      
-      let parsedData;
-      try {
-        parsedData = JSON.parse(responseData);
-      } catch (e) {
-        parsedData = { message: responseData };
-      }
-      
-      setApiResponse(parsedData);
-
-      if (response.ok) {
-        setMessage(parsedData.message || 'Airplane added successfully!');
-        // Reset form after successful submission
-        setAirlineID('');
-        setTailNum('');
-        setSeatCapacity('');
-        setSpeed('');
-        setLocationID('');
-        setPlaneType('');
-        setMaintenanced(false);
-        setModel('');
-        setNeo(false);
-      } else {
-        setError(parsedData.error || `Failed to add airplane. Status: ${response.status}`);
-      }
+      const data = await res.json();
+      alert(res.ok ? data.message || 'Airplane added successfully!' : data.error || `Failed: ${res.status}`);
+      if (res.ok) resetForm();
     } catch (err) {
-      console.error('Error adding airplane:', err);
-      setError(`An unexpected error occurred: ${err.message}`);
+      alert(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    // Navigate back or reset form
-    window.location.href = '/';
+  const resetForm = () => {
+    setAirlineID('');
+    setTailNum('');
+    setSeatCapacity('');
+    setSpeed('');
+    setLocationID('');
+    setPlaneType('');
+    setMaintenanced('null');
+    setModel('');
+    setNeo('null');
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <header className="mb-8">
-          <a href="/" className="inline-flex items-center text-gray-600 mb-6 hover:text-gray-900">
-            <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back to Dashboard
-          </a>
-
-          <h1 className="text-3xl font-bold mb-2 flex items-center">
-            <svg className="w-8 h-8 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 8H21L21 10H3V8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M5 10H19V17H5V10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M8 17V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 17V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 10L15 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Add Airplane
-          </h1>
-          <p className="text-gray-500 mb-8">Register a new airplane in the system</p>
-        </header>
-
-        <div className="bg-white p-8 rounded-lg shadow-sm">
-          {message && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-6">
-              {message}
-            </div>
-          )}
-          
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
-
-          {apiResponse && (
-            <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded mb-6 text-sm">
-              <details>
-                <summary className="cursor-pointer font-medium">API Response (Debug)</summary>
-                <pre className="mt-2 overflow-auto">{JSON.stringify(apiResponse, null, 2)}</pre>
-              </details>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Airline ID</label>
+    <PageTemplate title="Add Airplane">
+      <div style={{ maxWidth: 400, margin: '40px auto', padding: 16 }}>
+        <h2 style={{ marginBottom: 16 }}>Add Airplane</h2>
+        <form onSubmit={handleSubmit}>
+          {[
+            {
+              label: 'Airline ID *',
+              value: airlineID,
+              set: setAirlineID,
+              placeholder: 'e.g. AA001',
+              required: true,
+            },
+            {
+              label: 'Tail Number *',
+              value: tailNum,
+              set: setTailNum,
+              placeholder: 'e.g. TAIL123',
+              required: true,
+            },
+            {
+              label: 'Seat Capacity',
+              value: seatCapacity,
+              set: setSeatCapacity,
+              placeholder: 'e.g. 180',
+              type: 'number',
+            },
+            {
+              label: 'Speed',
+              value: speed,
+              set: setSpeed,
+              placeholder: 'e.g. 900',
+              type: 'number',
+            },
+            {
+              label: 'Location ID',
+              value: locationID,
+              set: setLocationID,
+              placeholder: 'e.g. LAX1',
+            },
+            {
+              label: 'Plane Type *',
+              value: planeType,
+              set: setPlaneType,
+              placeholder: 'e.g. Boeing',
+              required: true,
+            },
+            {
+              label: 'Maintenanced',
+              value: maintenanced,
+              set: setMaintenanced,
+              placeholder: 'null / false / true',
+            },
+            {
+              label: 'Model',
+              value: model,
+              set: setModel,
+              placeholder: 'e.g. 737-MAX or null',
+            },
+            {
+              label: 'Neo',
+              value: neo,
+              set: setNeo,
+              placeholder: 'null / false / true',
+            },
+          ].map(({ label, value, set, placeholder, type = 'text', required }, idx) => (
+            <div key={idx} style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', marginBottom: 4 }}>{label}</label>
               <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={airlineID}
-                onChange={(e) => setAirlineID(e.target.value)}
-                placeholder="Enter airline ID (e.g. AA001)"
-                required
+                type={type}
+                value={value}
+                onChange={(e) => set(e.target.value)}
+                placeholder={placeholder}
+                style={{ width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
+                {...(required ? { required: true } : {})}
               />
             </div>
+          ))}
 
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tail Number</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={tailNum}
-                onChange={(e) => setTailNum(e.target.value)}
-                placeholder="Enter tail number (e.g. TAIL123)"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Seat Capacity</label>
-              <input
-                type="number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={seatCapacity}
-                onChange={(e) => setSeatCapacity(e.target.value)}
-                placeholder="Enter seat capacity (e.g. 180)"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Speed</label>
-              <input
-                type="number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={speed}
-                onChange={(e) => setSpeed(e.target.value)}
-                placeholder="Enter speed (e.g. 900)"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location ID</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={locationID}
-                onChange={(e) => setLocationID(e.target.value)}
-                placeholder="Enter location ID (e.g. LAX1)"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Plane Type</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={planeType}
-                onChange={(e) => setPlaneType(e.target.value)}
-                placeholder="Enter plane type (e.g. Boeing)"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={maintenanced}
-                  onChange={(e) => setMaintenanced(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <span className="text-sm font-medium text-gray-700">Maintenanced</span>
-              </label>
-              <p className="text-xs text-gray-500 mt-1">Check if the airplane is maintenanced</p>
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                placeholder="Enter model (e.g. 737-MAX)"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={neo}
-                  onChange={(e) => setNeo(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <span className="text-sm font-medium text-gray-700">Neo</span>
-              </label>
-              <p className="text-xs text-gray-500 mt-1">Check if this is a neo model</p>
-            </div>
-          </div>
-
-          <div className="mt-8 flex justify-center space-x-4">
-            <button 
-              onClick={handleCancel}
-              className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
+              type="button"
+              onClick={resetForm}
+              style={{ padding: '8px 16px', background: '#ccc', border: 'none', borderRadius: 4, cursor: 'pointer' }}
             >
               Cancel
             </button>
-            
-            <button 
-              onClick={handleAddAirplane} 
+            <button
+              type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: 4, cursor: loading ? 'default' : 'pointer' }}
             >
               {loading ? 'Adding...' : 'Add'}
             </button>
           </div>
-        </div>
+        </form>
       </div>
-    </div>
+    </PageTemplate>
   );
-} 
+}

@@ -1,94 +1,139 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
+import { API_BASE_URL } from '../constant';
 
-const FlightTakeoff = () => {
+export default function OfferFlight() {
   const [flightId, setFlightId] = useState('');
+  const [routeId, setRouteId] = useState('');
+  const [supportAirline, setSupportAirline] = useState('');
+  const [progress, setProgress] = useState('');
+  const [nextTime, setNextTime] = useState('');
+  const [supportTail, setSupportTail] = useState('');
+  const [cost, setCost] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
+
+  const resetForm = () => {
+    setFlightId('');
+    setRouteId('');
+    setSupportAirline('');
+    setProgress('');
+    setNextTime('');
+    setSupportTail('');
+    setCost('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
-    setError(null);
-    
-    try {
-      // 这里添加API调用逻辑
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Flight takeoff successful!');
-      setSuccess(true);
-      
-      // 重置表单
-      resetForm();
-    } catch (err) {
-      setError('Failed to process flight takeoff. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFlightId('');
+    // TODO: replace with real API call
+    alert('Flight offered!');
+    setLoading(false);
+    resetForm();
   };
 
   return (
-    <PageTemplate 
-      title="Flight Takeoff" 
-      description="Process flight departure"
-    >
-      {success && (
-        <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          <span>Flight takeoff processed successfully!</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <span>{error}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <PageTemplate title="Offer Flight" description="Create a new flight offer">
+      <form onSubmit={handleSubmit}>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Flight ID</label>
+          <label>Flight ID</label><br />
           <input
             type="text"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={flightId}
-            onChange={(e) => setFlightId(e.target.value)}
-            placeholder="e.g. dl_10"
+            onChange={e => setFlightId(e.target.value)}
+            placeholder="un_41"
             required
+            style={{ width: '100%', padding: 6 }}
           />
         </div>
 
-        <div className="pt-4 flex justify-between">
-          <button 
+        <div>
+          <label>Route ID</label><br />
+          <input
+            type="text"
+            value={routeId}
+            onChange={e => setRouteId(e.target.value)}
+            placeholder="americas_three"
+            required
+            style={{ width: '100%', padding: 6 }}
+          />
+        </div>
+
+        <div>
+          <label>Support Airline</label><br />
+          <input
+            type="text"
+            value={supportAirline}
+            onChange={e => setSupportAirline(e.target.value)}
+            placeholder="United"
+            required
+            style={{ width: '100%', padding: 6 }}
+          />
+        </div>
+
+        <div>
+          <label>Progress</label><br />
+          <input
+            type="number"
+            value={progress}
+            onChange={e => setProgress(e.target.value)}
+            placeholder="0"
+            required
+            style={{ width: '100%', padding: 6 }}
+          />
+        </div>
+
+        <div>
+          <label>Next Time</label><br />
+          <input
+            type="time"
+            value={nextTime}
+            onChange={e => setNextTime(e.target.value)}
+            required
+            style={{ width: '100%', padding: 6 }}
+          />
+        </div>
+
+        <div>
+          <label>Support Tail</label><br />
+          <input
+            type="text"
+            value={supportTail}
+            onChange={e => setSupportTail(e.target.value)}
+            placeholder="n330ss"
+            required
+            style={{ width: '100%', padding: 6 }}
+          />
+        </div>
+
+        <div>
+          <label>Cost</label><br />
+          <input
+            type="number"
+            value={cost}
+            onChange={e => setCost(e.target.value)}
+            placeholder="400"
+            required
+            style={{ width: '100%', padding: 6 }}
+          />
+        </div>
+
+        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between' }}>
+          <button
             type="button"
-            className="bg-gray-600 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             onClick={resetForm}
+            style={{ padding: '6px 12px' }}
           >
             Cancel
           </button>
-          
-          <button 
+          <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ padding: '6px 12px' }}
           >
-            {loading ? 'Processing...' : 'Takeoff Flight'}
+            {loading ? 'Offering...' : 'Add Flight'}
           </button>
         </div>
       </form>
     </PageTemplate>
   );
-};
-
-export default FlightTakeoff; 
+}

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
+import { API_BASE_URL } from '../constant';
 
 const RetireFlight = () => {
   const [flightId, setFlightId] = useState('');

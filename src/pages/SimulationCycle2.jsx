@@ -1,74 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
+import { API_BASE_URL } from '../constant';
 
-const SimulationCycle = () => {
+export default function SimulationCycle() {
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Simulation Cycle';
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
-    setError(null);
-    
+    setMessage('');
+    setIsError(false);
+
     try {
-      // 这里添加API调用逻辑
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Simulation cycle executed successfully!');
-      setSuccess(true);
+      const res = await fetch(`${API_BASE_URL}/procedures/simulation_cycle`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage(data.message || 'Simulation cycle executed successfully!');
+      } else {
+        setIsError(true);
+        setMessage(data.error || `Failed: ${res.status}`);
+      }
     } catch (err) {
-      setError('Failed to execute simulation cycle. Please try again.');
+      setIsError(true);
+      setMessage(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <PageTemplate 
-      title="Simulation Cycle" 
-      description="Execute a simulation cycle in the system"
-    >
-      {success && (
-        <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          <span>Simulation cycle executed successfully!</span>
-        </div>
-      )}
+    <PageTemplate title="Simulation Cycle">
+      <div style={{ maxWidth: 400, margin: '40px auto', padding: 16 }}>
+        <h2 style={{ marginBottom: 16 }}>Simulation Cycle</h2>
 
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <span>{error}</span>
-        </div>
-      )}
+        {message && (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              borderRadius: 4,
+              background: isError ? '#fdecea' : '#e6f9f0',
+              color: isError ? '#c53030' : '#276749',
+              border: `1px solid ${isError ? '#feb2b2' : '#9ae6b4'}`,
+            }}
+          >
+            {message}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="pt-4 flex justify-between">
-          <button 
-            type="button"
-            className="bg-gray-600 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            onClick={() => window.history.back()}
-          >
-            Cancel
-          </button>
-          
-          <button 
-            type="submit"
-            disabled={loading}
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Processing...' : 'Next Step'}
-          </button>
-        </div>
-      </form>
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              style={{ padding: '8px 16px', background: '#888', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: 4, cursor: loading ? 'default' : 'pointer' }}
+            >
+              {loading ? 'Processing...' : 'Next Step'}
+            </button>
+          </div>
+        </form>
+      </div>
     </PageTemplate>
   );
-};
-
-export default SimulationCycle; 
+}

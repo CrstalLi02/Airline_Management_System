@@ -1,108 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
+import { API_BASE_URL } from '../constant';
 
-const AssignPilot = () => {
-  const [flightId, setFlightId] = useState('');
-  const [personId, setPersonId] = useState('');
+export default function AssignPilot() {
+  const [flightID, setFlightID] = useState('');
+  const [personID, setPersonID] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    document.title = 'Assign Pilot';
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!flightID || !personID) {
+      alert('Please fill in both fields.');
+      return;
+    }
     setLoading(true);
-    setSuccess(false);
-    setError(null);
-    
     try {
-      // 这里添加API调用逻辑
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Pilot assigned successfully!');
-      setSuccess(true);
-      
-      // 重置表单
-      resetForm();
+      const res = await fetch(`${API_BASE_URL}/procedures/assign_pilot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ flightID, personID }),
+      });
+      const data = await res.json();
+      alert(res.ok ? data.message || 'Pilot assigned!' : data.error || `Failed: ${res.status}`);
+      if (res.ok) resetForm();
     } catch (err) {
-      setError('Failed to assign pilot. Please try again.');
+      alert(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
-    setFlightId('');
-    setPersonId('');
+    setFlightID('');
+    setPersonID('');
   };
 
   return (
-    <PageTemplate 
-      title="Assign Pilot" 
-      description="Assign a pilot to a flight"
-    >
-      {success && (
-        <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          <span>Pilot successfully assigned to flight!</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <span>{error}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">ip_flightID</label>
-          <input
-            type="text"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={flightId}
-            onChange={(e) => setFlightId(e.target.value)}
-            placeholder="e.g. dl_42"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">ip_personID</label>
-          <input
-            type="text"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={personId}
-            onChange={(e) => setPersonId(e.target.value)}
-            placeholder="e.g. p7"
-            required
-          />
-        </div>
-
-        <div className="pt-4 flex justify-between">
-          <button 
-            type="button"
-            className="bg-gray-600 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            onClick={resetForm}
-          >
-            Cancel
-          </button>
-          
-          <button 
-            type="submit"
-            disabled={loading}
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Processing...' : 'Assign Pilot'}
-          </button>
-        </div>
-      </form>
+    <PageTemplate title="Assign Pilot">
+      <div style={{ maxWidth: 400, margin: '40px auto', padding: 16 }}>
+        <h2 style={{ marginBottom: 16 }}>Assign Pilot</h2>
+        <form onSubmit={handleSubmit}>
+          {[{ label: 'Flight ID *', value: flightID, set: setFlightID, placeholder: 'e.g. DL_42' }, { label: 'Person ID *', value: personID, set: setPersonID, placeholder: 'e.g. P7' }].map(({ label, value, set, placeholder }, idx) => (
+            <div key={idx} style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', marginBottom: 4 }}>{label}</label>
+              <input
+                type="text"
+                value={value}
+                onChange={(e) => set(e.target.value)}
+                placeholder={placeholder}
+                style={{ width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
+                required
+              />
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
+              type="button"
+              onClick={resetForm}
+              style={{ padding: '8px 16px', background: '#888', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: 4, cursor: loading ? 'default' : 'pointer' }}
+            >
+              {loading ? 'Assigning...' : 'Assign'}
+            </button>
+          </div>
+        </form>
+      </div>
     </PageTemplate>
   );
-};
-
-export default AssignPilot; 
+}

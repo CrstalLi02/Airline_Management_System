@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PageTemplate from '../components/PageTemplate';
 import { API_BASE_URL } from '../constant';
 
 export default function AddPerson() {
@@ -13,201 +14,101 @@ export default function AddPerson() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Set the document title
-    document.title = 'Add Person | Airline Management System';
+    document.title = 'Add Person';
   }, []);
 
-  const handleAddPerson = async () => {
-    setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     if (!personID || !firstName || !lastName) {
       alert('Person ID, First Name, and Last Name are required.');
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/procedures/add_person`, {
+      const body = {
+        personID,
+        first_name: firstName,
+        last_name: lastName,
+        locationID: locationID || null,
+        tax_id: taxID || null,
+        experience: experience ? parseInt(experience, 10) : null,
+        miles: miles ? parseInt(miles, 10) : null,
+        funds: funds ? parseFloat(funds) : null,
+      };
+      const res = await fetch(`${API_BASE_URL}/procedures/add_person`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          personID: personID,
-          firstName: firstName,
-          lastName: lastName,
-          locationID: locationID,
-          taxID: taxID,
-          experience: experience ? parseInt(experience) : null,
-          miles: miles,
-          funds: funds
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
-
-      if (response.ok) {
-        // Reset form after successful submission
-        setPersonID('');
-        setFirstName('');
-        setLastName('');
-        setLocationID('');
-        setTaxID('');
-        setExperience('');
-        setMiles('');
-        setFunds('');
-        
-        // Show success message
-        alert('Person added successfully!');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to add person.');
-      }
+      const data = await res.json();
+      alert(res.ok ? data.message || 'Person added successfully!' : data.error || `Failed: ${res.status}`);
+      if (res.ok) resetForm();
     } catch (err) {
-      console.error('Error adding person:', err);
-      alert('An unexpected error occurred.');
+      alert(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    // Navigate back or reset form
-    window.location.href = '/';
+  const resetForm = () => {
+    setPersonID('');
+    setFirstName('');
+    setLastName('');
+    setLocationID('');
+    setTaxID('');
+    setExperience('');
+    setMiles('');
+    setFunds('');
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <header className="mb-8">
-          <a href="/" className="inline-flex items-center text-gray-600 mb-6 hover:text-gray-900">
-            <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back to Dashboard
-          </a>
-
-          <h1 className="text-3xl font-bold mb-2 flex items-center">
-            <svg className="w-8 h-8 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 21V19C20 16.7909 18.2091 15 16 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Add Person
-          </h1>
-          <p className="text-gray-500 mb-8">Register a new person in the system</p>
-        </header>
-
-        <div className="bg-white p-8 rounded-lg shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Person ID</label>
+    <PageTemplate title="Add Person">
+      <div style={{ maxWidth: 400, margin: '40px auto', padding: 16 }}>
+        <h2 style={{ marginBottom: 16 }}>Add Person</h2>
+        <form onSubmit={handleSubmit}>
+          {[
+            { label: 'Person ID *', value: personID, set: setPersonID, placeholder: 'e.g. P1001', required: true },
+            { label: 'First Name *', value: firstName, set: setFirstName, placeholder: 'e.g. Sabrina', required: true },
+            { label: 'Last Name *', value: lastName, set: setLastName, placeholder: 'e.g. Duncan', required: true },
+            { label: 'Location ID', value: locationID, set: setLocationID, placeholder: 'e.g. port_1' },
+            { label: 'Tax ID', value: taxID, set: setTaxID, placeholder: 'e.g. 366-50-3732' },
+            { label: 'Experience', value: experience, set: setExperience, placeholder: 'e.g. 27', type: 'number' },
+            { label: 'Miles', value: miles, set: setMiles, placeholder: 'e.g. 1200', type: 'number' },
+            { label: 'Funds', value: funds, set: setFunds, placeholder: 'e.g. 5000', type: 'number' },
+          ].map(({ label, value, set, placeholder, type = 'text', required }, idx) => (
+            <div key={idx} style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', marginBottom: 4 }}>{label}</label>
               <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={personID}
-                onChange={(e) => setPersonID(e.target.value)}
-                placeholder="Enter person ID (e.g. p61)"
-                required
+                type={type}
+                value={value}
+                onChange={(e) => set(e.target.value)}
+                placeholder={placeholder}
+                style={{ width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
+                {...(required ? { required: true } : {})}
               />
             </div>
+          ))}
 
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Enter first name"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Enter last name"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location ID</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={locationID}
-                onChange={(e) => setLocationID(e.target.value)}
-                placeholder="Enter location ID (e.g. port_1)"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={taxID}
-                onChange={(e) => setTaxID(e.target.value)}
-                placeholder="Enter tax ID (e.g. 366-50-3732)"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
-              <input
-                type="number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-                placeholder="Enter experience (e.g. 27)"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Miles</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={miles}
-                onChange={(e) => setMiles(e.target.value)}
-                placeholder="Enter miles or NULL"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Funds</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={funds}
-                onChange={(e) => setFunds(e.target.value)}
-                placeholder="Enter funds or NULL"
-              />
-            </div>
-          </div>
-
-          <div className="mt-8 flex justify-center space-x-4">
-            <button 
-              onClick={handleCancel}
-              className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
+              type="button"
+              onClick={resetForm}
+              style={{ padding: '8px 16px', background: '#ccc', border: 'none', borderRadius: 4, cursor: 'pointer' }}
             >
               Cancel
             </button>
-            
-            <button 
-              onClick={handleAddPerson}
+            <button
+              type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: 4, cursor: loading ? 'default' : 'pointer' }}
             >
               {loading ? 'Adding...' : 'Add'}
             </button>
           </div>
-        </div>
+        </form>
       </div>
-    </div>
+    </PageTemplate>
   );
-} 
+}

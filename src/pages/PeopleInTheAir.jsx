@@ -1,152 +1,87 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
+import { API_BASE_URL } from '../constant';
 
-const PeopleInTheAir = () => {
-  const [peopleData, setPeopleData] = useState([]);
+export default function PeopleInTheAir() {
+  const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // 模拟数据获取 - 实际项目中会从API获取
-    const fetchPeopleInAirData = async () => {
+    document.title = 'People in the Air';
+    const fetchData = async () => {
       try {
-        // 模拟数据 - 符合图片中的格式
-        const mockData = [
-          { 
-            departing_from: 'BCN',
-            arriving_at: 'CDG',
-            num_airplanes: 1,
-            airplane_list: 'plane_8',
-            flight_list: 'lf_20',
-            earliest_arrival: '11:00:00',
-            latest_arrival: '11:00:00',
-            num_pilots: 1,
-            num_passengers: 2,
-            joint_pilots_passengers: 3,
-            persons_list: 'p27/p28/p52'
-          },
-          { 
-            departing_from: 'BER',
-            arriving_at: 'CAN',
-            num_airplanes: 1,
-            airplane_list: 'plane_20',
-            flight_list: 'ja_35',
-            earliest_arrival: '09:30:00',
-            latest_arrival: '09:30:00',
-            num_pilots: 1,
-            num_passengers: 2,
-            joint_pilots_passengers: 3,
-            persons_list: 'p33/p34/p53'
-          }
-        ];
-        
-        setPeopleData(mockData);
-        setLoading(false);
+        const res = await fetch(`${API_BASE_URL}/views/people_in_the_air`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        // API returns { data: [...] }
+        const dataArray = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
+        setRows(dataArray);
       } catch (err) {
-        setError('Failed to fetch people in the air data');
+        setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
-
-    fetchPeopleInAirData();
+    fetchData();
   }, []);
 
-  if (loading) {
-    return (
-      <PageTemplate 
-        title="People In The Air" 
-        description="Monitor people currently in the air"
-      >
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      </PageTemplate>
-    );
-  }
-
-  if (error) {
-    return (
-      <PageTemplate 
-        title="People In The Air" 
-        description="Monitor people currently in the air"
-      >
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
-        </div>
-      </PageTemplate>
-    );
-  }
+  const headers = [
+    'Departing',
+    'Arriving',
+    '#Airplanes',
+    'Airplane List',
+    'Flight List',
+    'Earliest',
+    'Latest',
+    '#Pilots',
+    '#Passengers',
+    'Total',
+    'Person List',
+  ];
 
   return (
-    <PageTemplate 
-      title="People In The Air" 
-      description="Monitor people currently in the air"
-    >
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">View: People In The Air</h2>
-        <p className="text-lg text-gray-600 mb-6 font-medium">people_in_air()</p>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr className="bg-blue-600 text-white">
-                <th className="py-3 px-4 text-left font-semibold">Departing From</th>
-                <th className="py-3 px-4 text-left font-semibold">Arriving At</th>
-                <th className="py-3 px-4 text-left font-semibold">Num Airplanes</th>
-                <th className="py-3 px-4 text-left font-semibold">Airplane List</th>
-                <th className="py-3 px-4 text-left font-semibold">Flight List</th>
-                <th className="py-3 px-4 text-left font-semibold">Earliest Arrival</th>
-                <th className="py-3 px-4 text-left font-semibold">Latest Arrival</th>
-                <th className="py-3 px-4 text-left font-semibold">Num Pilots</th>
-                <th className="py-3 px-4 text-left font-semibold">Num Passengers</th>
-                <th className="py-3 px-4 text-left font-semibold">Joint Pilots Passengers</th>
-                <th className="py-3 px-4 text-left font-semibold">Persons List</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {peopleData.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="py-3 px-4">{item.departing_from}</td>
-                  <td className="py-3 px-4">{item.arriving_at}</td>
-                  <td className="py-3 px-4">{item.num_airplanes}</td>
-                  <td className="py-3 px-4">{item.airplane_list}</td>
-                  <td className="py-3 px-4">{item.flight_list}</td>
-                  <td className="py-3 px-4">{item.earliest_arrival}</td>
-                  <td className="py-3 px-4">{item.latest_arrival}</td>
-                  <td className="py-3 px-4">{item.num_pilots}</td>
-                  <td className="py-3 px-4">{item.num_passengers}</td>
-                  <td className="py-3 px-4">{item.joint_pilots_passengers}</td>
-                  <td className="py-3 px-4">{item.persons_list}</td>
+    <PageTemplate title="People in the Air">
+      <div style={{ maxWidth: 900, margin: '40px auto', padding: 16 }}>
+        <h2 style={{ marginBottom: 16 }}>People in the Air</h2>
+        {loading && <p style={{ textAlign: 'center' }}>Loading...</p>}
+        {error && <p style={{ textAlign: 'center', color: 'red' }}>Error: {error}</p>}
+        {!loading && !error && rows.length === 0 && (
+          <p style={{ textAlign: 'center' }}>No people in the air.</p>
+        )}
+        {!loading && !error && rows.length > 0 && (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ minWidth: 800, width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr>
+                  {headers.map((h) => (
+                    <th key={h} style={{ border: '1px solid #ccc', padding: 8, background: '#f0f0f0' }}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-              <tr className="text-gray-400">
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        {peopleData.length === 0 && (
-          <div className="text-center py-8">
-            <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
-            <p className="text-gray-500">No people in air data found</p>
+              </thead>
+              <tbody>
+                {rows.map((r, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: 8 }}>{r.departing_from}</td>
+                    <td style={{ padding: 8 }}>{r.arriving_at}</td>
+                    <td style={{ padding: 8 }}>{r.num_airplanes}</td>
+                    <td style={{ padding: 8 }}>{r.airplane_list}</td>
+                    <td style={{ padding: 8 }}>{r.flight_list}</td>
+                    <td style={{ padding: 8 }}>{r.earliest_arrival}</td>
+                    <td style={{ padding: 8 }}>{r.latest_arrival}</td>
+                    <td style={{ padding: 8 }}>{r.num_pilots}</td>
+                    <td style={{ padding: 8 }}>{r.num_passengers}</td>
+                    <td style={{ padding: 8 }}>{r.joint_pilots_passengers}</td>
+                    <td style={{ padding: 8 }}>{r.person_list}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
     </PageTemplate>
   );
-};
-
-export default PeopleInTheAir; 
+}

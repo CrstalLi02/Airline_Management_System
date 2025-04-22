@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import "./App.css";
 
 // 导入已创建的页面组件
 import MainPage from './pages/MainPage';

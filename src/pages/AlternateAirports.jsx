@@ -1,127 +1,79 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
+import { API_BASE_URL } from '../constant';
 
-const AlternateAirports = () => {
-  const [airportData, setAirportData] = useState([]);
+export default function AlternateAirports() {
+  const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // 模拟数据获取 - 实际项目中会从API获取
-    const fetchAirportsData = async () => {
+    document.title = 'Alternate Airports';
+
+    const fetchData = async () => {
+      const tryFetch = async (url) => {
+        const res = await fetch(url);
+        if (res.status === 404) return { notFound: true };
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        return { data: Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [] };
+      };
+
       try {
-        // 模拟数据 - 符合图片中的格式
-        const mockData = [
-          { 
-            city: 'Chicago',
-            state: 'Illinois',
-            country: 'USA',
-            num_airports: 2,
-            airport_code_list: 'MDW, ORD',
-            airport_names_list: 'Chicago Midway International, O_Hare International'
-          },
-          { 
-            city: 'Houston',
-            state: 'Texas',
-            country: 'USA',
-            num_airports: 2,
-            airport_code_list: 'HOU, IAH',
-            airport_names_list: 'William P. Hobby International, George Bush Intercontinental'
-          }
-        ];
-        
-        setAirportData(mockData);
-        setLoading(false);
+        /* API spec says the endpoint is  <BASE>/api/views/alternative_airports  */
+        let result = await tryFetch(`${API_BASE_URL}/api/views/alternative_airports`);
+        if (result.notFound) {
+          // fallback (older path without /api prefix)
+          result = await tryFetch(`${API_BASE_URL}/views/alternative_airports`);
+        }
+        setRows(result.data || []);
       } catch (err) {
-        setError('Failed to fetch alternate airports data');
+        setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchAirportsData();
+    fetchData();
   }, []);
 
-  if (loading) {
-    return (
-      <PageTemplate 
-        title="Alternate Airports" 
-        description="View alternate airports by city"
-      >
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      </PageTemplate>
-    );
-  }
-
-  if (error) {
-    return (
-      <PageTemplate 
-        title="Alternate Airports" 
-        description="View alternate airports by city"
-      >
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
-        </div>
-      </PageTemplate>
-    );
-  }
+  const headers = ['City', 'State', 'Country', '# Airports', 'Codes', 'Names'];
 
   return (
-    <PageTemplate 
-      title="Alternate Airports" 
-      description="View alternate airports by city"
-    >
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">View: Alternate Airports</h2>
-        <p className="text-lg text-gray-600 mb-6 font-medium">alternative_airports()</p>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr className="bg-blue-600 text-white">
-                <th className="py-3 px-4 text-left font-semibold">City</th>
-                <th className="py-3 px-4 text-left font-semibold">State</th>
-                <th className="py-3 px-4 text-left font-semibold">Country</th>
-                <th className="py-3 px-4 text-left font-semibold">Num Airports</th>
-                <th className="py-3 px-4 text-left font-semibold">Airport Code List</th>
-                <th className="py-3 px-4 text-left font-semibold">Airport Names List</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {airportData.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="py-3 px-4">{item.city}</td>
-                  <td className="py-3 px-4">{item.state}</td>
-                  <td className="py-3 px-4">{item.country}</td>
-                  <td className="py-3 px-4">{item.num_airports}</td>
-                  <td className="py-3 px-4">{item.airport_code_list}</td>
-                  <td className="py-3 px-4">{item.airport_names_list}</td>
+    <PageTemplate title="Alternate Airports">
+      <div style={{ maxWidth: 800, margin: '40px auto', padding: 16 }}>
+        <h2 style={{ marginBottom: 16 }}>Alternate Airports</h2>
+        {loading && <p style={{ textAlign: 'center' }}>Loading...</p>}
+        {error && <p style={{ textAlign: 'center', color: 'red' }}>Error: {error}</p>}
+        {!loading && !error && rows.length === 0 && (
+          <p style={{ textAlign: 'center' }}>No alternate airports found.</p>
+        )}
+        {!loading && !error && rows.length > 0 && (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ minWidth: 700, width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr>
+                  {headers.map((h) => (
+                    <th key={h} style={{ border: '1px solid #ccc', padding: 8, background: '#f0f0f0' }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-              <tr className="text-gray-400">
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-                <td className="py-3 px-4">...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        {airportData.length === 0 && (
-          <div className="text-center py-8">
-            <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-            </svg>
-            <p className="text-gray-500">No alternate airports found</p>
+              </thead>
+              <tbody>
+                {rows.map((r, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: 8 }}>{r.city}</td>
+                    <td style={{ padding: 8 }}>{r.state}</td>
+                    <td style={{ padding: 8 }}>{r.country}</td>
+                    <td style={{ padding: 8 }}>{r.num_airports}</td>
+                    <td style={{ padding: 8 }}>{r.airport_code_list}</td>
+                    <td style={{ padding: 8 }}>{r.airport_name_list}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
     </PageTemplate>
   );
-};
-
-export default AlternateAirports; 
+}

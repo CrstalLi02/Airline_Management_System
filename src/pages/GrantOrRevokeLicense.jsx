@@ -1,85 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
+import { API_BASE_URL } from '../constant';
 
-const GrantOrRevokeLicense = () => {
-  const [personId, setPersonId] = useState('');
+export default function GrantOrRevokeLicense() {
+  const [personID, setPersonID] = useState('');
   const [license, setLicense] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    document.title = 'Grant / Revoke License';
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!personID || !license) {
+      alert('Please fill in both fields.');
+      return;
+    }
     setLoading(true);
-    
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 500));
-      alert('License operation completed successfully!');
-    } catch (error) {
-      alert('Failed to complete operation.');
+      const res = await fetch(`${API_BASE_URL}/procedures/grant_or_revoke_pilot_license`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ personID, license }),
+      });
+      const data = await res.json();
+      alert(res.ok ? data.message || 'Operation successful!' : data.error || `Failed: ${res.status}`);
+      if (res.ok) resetForm();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    // 返回主页或重置表单
-    window.location.href = '/';
+  const resetForm = () => {
+    setPersonID('');
+    setLicense('');
   };
 
   return (
-    <PageTemplate 
-      title="Grant or Revoke License" 
-      description="Manage pilot and crew member licenses"
-    >
-      <div className="max-w-lg mx-auto">
-        <h2 className="text-xl font-semibold mb-6"></h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Person ID</label>
+    <PageTemplate title="Grant or Revoke License">
+      <div style={{ maxWidth: 400, margin: '40px auto', padding: 16 }}>
+        <h2 style={{ marginBottom: 16 }}>Grant or Revoke License</h2>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', marginBottom: 4 }}>Person ID *</label>
             <input
               type="text"
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={personId}
-              onChange={(e) => setPersonId(e.target.value)}
-              placeholder="Enter person ID (e.g. p1)"
+              value={personID}
+              onChange={(e) => setPersonID(e.target.value)}
+              placeholder="e.g. P1001"
+              style={{ width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
               required
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">License</label>
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', marginBottom: 4 }}>License *</label>
             <input
               type="text"
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={license}
               onChange={(e) => setLicense(e.target.value)}
-              placeholder="Enter license type (e.g. Airbus)"
+              placeholder="e.g. Airbus"
+              style={{ width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
               required
             />
           </div>
-
-          <div className="pt-6 flex justify-between">
-            <button 
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
               type="button"
-              onClick={handleCancel}
-              className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              onClick={resetForm}
+              style={{ padding: '8px 16px', background: '#ccc', border: 'none', borderRadius: 4, cursor: 'pointer' }}
             >
               Cancel
             </button>
-            
-            <button 
+            <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: 4, cursor: loading ? 'default' : 'pointer' }}
             >
-              {loading ? 'Processing...' : 'Add / Revoke'}
+              {loading ? 'Processing...' : 'Submit'}
             </button>
           </div>
         </form>
       </div>
     </PageTemplate>
   );
-};
-
-export default GrantOrRevokeLicense; 
+}
