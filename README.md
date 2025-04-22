@@ -17,7 +17,6 @@ A React-based application for managing airline operations.
 - TypeScript
 - React Router
 - Tailwind CSS
-- Lucide React (for icons)
 
 ## Getting Started
 
