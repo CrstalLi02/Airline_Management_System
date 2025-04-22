@@ -65,3 +65,8 @@ This React app functions as the user interface for an flight tracking system.
 
 ## Contributor
 Yixuan Li and Yiting Zhang were working on the frontend
+
+## Backend repo
+``` bash
+https://github.com/Li-8023/cs4400-flight-tracking-backend
+```
