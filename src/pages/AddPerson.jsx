@@ -20,30 +20,39 @@ export default function AddPerson() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!personID || !firstName || !lastName) {
-      alert('Person ID, First Name, and Last Name are required.');
+    if (!personID || !firstName || !locationID) {
+      alert("Person ID, First Name, and Location ID are required.");
       return;
     }
+
+    if (taxID.trim() !== "" && miles.trim() !== "") {
+      alert("A person cannot be a pilot and passenger at the same time.");
+      return;
+    }
+
 
     setLoading(true);
     try {
       const body = {
         personID,
         first_name: firstName,
-        last_name: lastName,
-        locationID: locationID || null,
-        tax_id: taxID || null,
-        experience: experience ? parseInt(experience, 10) : null,
-        miles: miles ? parseInt(miles, 10) : null,
-        funds: funds ? parseFloat(funds) : null,
+        last_name: lastName || null,
+        locationID,
+        taxID: taxID || null,
+        experience: isNaN(parseInt(experience, 10))
+          ? null
+          : parseInt(experience, 10),
+        miles: isNaN(parseInt(miles, 10)) ? null : parseInt(miles, 10),
+        funds: isNaN(parseFloat(funds)) ? null : parseFloat(funds),
       };
+
       const res = await fetch(`${API_BASE_URL}/procedures/add_person`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      alert(res.ok ? data.message || 'Person added successfully!' : data.error || `Failed: ${res.status}`);
+      alert(res.ok ? data.message || 'Person added successfully!' : data.details || `Failed: ${res.status}`);
       if (res.ok) resetForm();
     } catch (err) {
       alert(`Error: ${err.message}`);
@@ -69,10 +78,10 @@ export default function AddPerson() {
         <h2 style={{ marginBottom: 16 }}>Add Person</h2>
         <form onSubmit={handleSubmit}>
           {[
-            { label: 'Person ID *', value: personID, set: setPersonID, placeholder: 'e.g. P1001', required: true },
+            { label: 'Person ID *', value: personID, set: setPersonID, placeholder: 'e.g. p61', required: true },
             { label: 'First Name *', value: firstName, set: setFirstName, placeholder: 'e.g. Sabrina', required: true },
             { label: 'Last Name *', value: lastName, set: setLastName, placeholder: 'e.g. Duncan', required: true },
-            { label: 'Location ID', value: locationID, set: setLocationID, placeholder: 'e.g. port_1' },
+            { label: 'Location ID *', value: locationID, set: setLocationID, placeholder: 'e.g. port_1' },
             { label: 'Tax ID', value: taxID, set: setTaxID, placeholder: 'e.g. 366-50-3732' },
             { label: 'Experience', value: experience, set: setExperience, placeholder: 'e.g. 27', type: 'number' },
             { label: 'Miles', value: miles, set: setMiles, placeholder: 'e.g. 1200', type: 'number' },

@@ -23,11 +23,16 @@ export default function SimulationCycle() {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage(data.message || 'Simulation cycle executed successfully!');
+        const result = data.data;
+        const msg = result
+          ? `Flight ${result.flight_id} ${result.action}`
+          : data.message || "Simulation cycle executed successfully!";
+        setMessage(msg);
       } else {
         setIsError(true);
-        setMessage(data.error || `Failed: ${res.status}`);
+        setMessage(data.details || `Failed: ${res.status}`);
       }
+
     } catch (err) {
       setIsError(true);
       setMessage(`Error: ${err.message}`);

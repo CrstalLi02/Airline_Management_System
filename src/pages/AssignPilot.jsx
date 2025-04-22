@@ -25,7 +25,7 @@ export default function AssignPilot() {
         body: JSON.stringify({ flightID, personID }),
       });
       const data = await res.json();
-      alert(res.ok ? data.message || 'Pilot assigned!' : data.error || `Failed: ${res.status}`);
+      alert(res.ok ? data.message || 'Pilot assigned!' : data.details || `Failed: ${res.status}`);
       if (res.ok) resetForm();
     } catch (err) {
       alert(`Error: ${err.message}`);

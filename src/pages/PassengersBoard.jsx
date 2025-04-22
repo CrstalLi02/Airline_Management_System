@@ -33,7 +33,7 @@ export default function PassengersBoard() {
         setFlightID('');
       } else {
         setIsError(true);
-        setMessage(data.error || `Failed: ${res.status}`);
+        setMessage(data.details || `Failed: ${res.status}`);
       }
     } catch (err) {
       setIsError(true);

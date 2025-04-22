@@ -14,7 +14,6 @@ export default function FlightsInTheAir() {
         const res = await fetch(`${API_BASE_URL}/views/flights_in_the_air`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        // API returns { data: [...] }
         const dataArray = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
         setRows(dataArray);
       } catch (err) {

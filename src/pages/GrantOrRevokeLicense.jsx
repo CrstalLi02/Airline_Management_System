@@ -25,10 +25,10 @@ export default function GrantOrRevokeLicense() {
         body: JSON.stringify({ personID, license }),
       });
       const data = await res.json();
-      alert(res.ok ? data.message || 'Operation successful!' : data.error || `Failed: ${res.status}`);
+      alert(res.ok ? data.message || 'Operation successful!' : data.details || `Failed: ${res.status}`);
       if (res.ok) resetForm();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      alert(`Error: ${err.details}`);
     } finally {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ export default function GrantOrRevokeLicense() {
               type="text"
               value={personID}
               onChange={(e) => setPersonID(e.target.value)}
-              placeholder="e.g. P1001"
+              placeholder="e.g. p1"
               style={{ width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
               required
             />
@@ -61,7 +61,7 @@ export default function GrantOrRevokeLicense() {
               type="text"
               value={license}
               onChange={(e) => setLicense(e.target.value)}
-              placeholder="e.g. Airbus"
+              placeholder="e.g. Boeing"
               style={{ width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
               required
             />

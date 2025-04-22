@@ -24,7 +24,7 @@ export default function FlightLanding() {
         body: JSON.stringify({ flightID }),
       });
       const data = await res.json();
-      alert(res.ok ? data.message || `Flight ${flightID} landed successfully!` : data.error || `Failed: ${res.status}`);
+      alert(res.ok ? data.message || `Flight ${flightID} landed successfully!` : data.details || `Failed: ${res.status}`);
       if (res.ok) setFlightID('');
     } catch (err) {
       alert(`Error: ${err.message}`);

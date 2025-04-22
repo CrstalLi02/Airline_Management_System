@@ -26,14 +26,23 @@ export default function OfferFlight() {
     }
     setLoading(true);
     try {
-      const body = { flightID, routeID, supportAirline, progress: parseInt(progress, 10), nextTime, supportTail, cost: parseFloat(cost) };
+      const body = {
+        flightID,
+        routeID,
+        support_airline: supportAirline,
+        support_tail: supportTail,
+        progress: parseInt(progress, 10),
+        next_time: nextTime,
+        cost: parseFloat(cost),
+      };
+
       const res = await fetch(`${API_BASE_URL}/procedures/offer_flight`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      alert(res.ok ? data.message || 'Flight offered successfully!' : data.error || `Failed: ${res.status}`);
+      alert(res.ok ? data.message || 'Flight offered successfully!' : data.details || `Failed: ${res.status}`);
       if (res.ok) resetForm();
     } catch (err) {
       alert(`Error: ${err.message}`);

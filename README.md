@@ -1,4 +1,4 @@
-# Airline Management System
+# Flight Tracking System Frontend
 
 A React-based application for managing airline operations.
 
@@ -30,15 +30,10 @@ A React-based application for managing airline operations.
 
 1. Clone the repository
 ```
-git clone <repository-url>
+https://github.com/CrstalLi02/Airline_Management_System.git
 ```
 
-2. Navigate to the project directory
-```
-cd airline-management
-```
-
-3. Install dependencies
+2. Install dependencies
 ```
 npm install
 ```
@@ -60,10 +55,13 @@ yarn start
 
 2. Open your browser and navigate to `http://localhost:3000`
 
-## Project Structure
+## How It Works
 
-- `/src`: Source code
-  - `/components`: Reusable components
-  - `/pages`: Page components
-  - `/utils`: Utility functions
-- `/public`: Static assets 
+This React app functions as the user interface for an flight tracking system.
+
+- Users fill forms, and the app validates input before submitting it via `fetch()` to backend API endpoints.
+
+-  The app sends HTTP requests to backend routes like `/procedures/add_person`, which then invoke corresponding stored procedures in the MySQL database.
+
+## Contributor
+Yixuan Li and Yiting Zhang were working on the frontend

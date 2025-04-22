@@ -14,7 +14,6 @@ export default function FlightsOnTheGround() {
         const res = await fetch(`${API_BASE_URL}/views/flights_on_the_ground`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        // API returns { data: [...] }
         const dataArray = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
         setRows(dataArray);
       } catch (err) {

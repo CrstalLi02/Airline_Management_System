@@ -28,12 +28,23 @@ export default function AddAirport() {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/procedures/add_airport`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ airportId, airportName, city, state, country, locationId }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          airportID: airportId, 
+          airport_name: airportName,
+          city,
+          state,
+          country,
+          locationID: locationId, 
+        }),
       });
       const data = await res.json();
-      alert(res.ok ? data.message || 'Airport added successfully!' : data.error || `Failed: ${res.status}`);
+      alert(
+        res.ok
+          ? data.message || "Airplane added successfully!"
+          : data.details || `Failed: ${res.status}`
+      );
       if (res.ok) resetForm();
     } catch (err) {
       alert(`Error: ${err.message}`);
